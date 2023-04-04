@@ -13,6 +13,11 @@ class Tickets(Base):
     class STATUS(Enum):
         ACTIVE = 1
         DELETED = 2
+    
+    class PRIORITY(Enum):
+        LOW=1
+        MEDIUM=2
+        HIGH=3
 
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     title = db.Column(db.String(500), nullable=False)
@@ -22,6 +27,7 @@ class Tickets(Base):
     is_offensive = db.Column(db.Boolean(), default=False)
     is_faq = db.Column(db.Boolean(), default=False)
     status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
+    priority = db.Column(db.Enum(PRIORITY), server_default="LOW")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
     
@@ -133,6 +139,17 @@ class TicketTags(Base):
         db.UniqueConstraint('tag_id', 'ticket_id', name='_ticket_vote_uc'),
     )
 
+'''
+Admin will assign tickets to support staff
+'''
+class SupportStaffTickets(Base):
+    __tablename__ = "support_staff_tickets"
+
+    id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    ticket_id = db.Column(db.Text, db.ForeignKey(Tickets.id, ondelete='CASCADE'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class SupportStaffTags(Base):
     __tablename__ = "support_staff_tags"
 
@@ -140,4 +157,3 @@ class SupportStaffTags(Base):
     user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     tag_id = db.Column(db.Text, db.ForeignKey(Tags.id, ondelete='CASCADE'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
