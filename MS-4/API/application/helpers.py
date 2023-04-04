@@ -17,7 +17,7 @@ def validate(token="", key=""):
     
     res = {"success":False, "message": "Initalise"}
     try:
-        activeSession = db.session.query(ActiveSession).filter(ActiveSession.ver_code == token, user_id=key).first()
+        activeSession = db.session.query(ActiveSession).filter(ActiveSession.ver_code == token, ActiveSession.user_id==key).first()
         
         if activeSession != None:
             activeSession.last_access_datetime = datetime.now()

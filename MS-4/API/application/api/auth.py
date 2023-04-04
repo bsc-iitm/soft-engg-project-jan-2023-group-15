@@ -5,6 +5,7 @@ from application.database import db
 class Login(Resource):
 
     def post(self):
+        """
         user = User(
             email = "dipak@patil3.com",
             password = "absccdd",
@@ -14,12 +15,12 @@ class Login(Resource):
         
         db.session.add(user)
         db.session.commit()
-            
+        """    
         user = User(
-            email = "dipak@patil4.com",
+            email = "savi@gmail.com",
             password = "absccdd",
-            username = "dipak",
-            full_name = "dipak patil"
+            username = "savi",
+            full_name = "Savindra Singh"
         )
         db.session.add(user)
         db.session.commit()
