@@ -49,8 +49,11 @@ app, api, celery = create_app()
 
 migrate = Migrate(app, db, render_as_batch=True)
 
-from application.api.auth import Login
+from application.api.auth import Login, SupportStaffLogin, SupportStaffRegister, Logout
 api.add_resource(Login, '/api/login', methods=['POST'])
+api.add_resource(SupportStaffLogin, '/api/support_login', methods=['POST'])
+api.add_resource(SupportStaffRegister, '/api/support_register', methods=['POST'])
+api.add_resource(Logout, '/api/logout', methods=['POST'])
 
 from application.api.user import UserManagement
 api.add_resource(UserManagement, '/api/user', methods=['POST', 'GET'])

@@ -121,11 +121,15 @@ class TrackerEditTicket(Base):
 
 class Tags(Base):
     __tablename__ = "tags"
-    
+    class STATUS(Enum):
+        ACTIVE = 1
+        DELETED = 2
+
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     tag_title = db.Column(db.String(200), unique=True, nullable=False)
     created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())
 
 class TicketTags(Base):
@@ -144,16 +148,29 @@ Admin will assign tickets to support staff
 '''
 class SupportStaffTickets(Base):
     __tablename__ = "support_staff_tickets"
-
+    class STATUS(Enum):
+        ACTIVE = 1
+        DELETED = 2
+        
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     ticket_id = db.Column(db.Text, db.ForeignKey(Tickets.id, ondelete='CASCADE'), nullable=False)
+    created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())    
 
 class SupportStaffTags(Base):
     __tablename__ = "support_staff_tags"
+    
+    class STATUS(Enum):
+        ACTIVE = 1
+        DELETED = 2
 
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     tag_id = db.Column(db.Text, db.ForeignKey(Tags.id, ondelete='CASCADE'), nullable=False)
+    created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())    

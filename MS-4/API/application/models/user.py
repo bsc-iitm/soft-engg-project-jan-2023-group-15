@@ -21,8 +21,8 @@ class User(Base):
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
-    username = db.Column(db.String(100), nullable=False)
-    full_name = db.Column(db.String(100), nullable=False)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    full_name = db.Column(db.String(100), nullable=True)
     profile_picture = db.Column(db.String(1000), nullable=True)
     role = db.Column(db.Enum(Role), server_default="STUDENT")
     status = db.Column(db.Enum(ACCOUNT_STATUS), server_default="ACTIVE")
@@ -31,4 +31,4 @@ class User(Base):
     
     #backref is a simple way to also declare a new property on the class
     tickets = db.relationship("Tickets", backref="tickets", lazy="dynamic")
-    tags = db.relationship("SupportStaffTags", backref="support_staff_tags", lazy="dynamic")
+    tags = db.relationship("SupportStaffTags", backref="support_staff_tags", foreign_keys="SupportStaffTags.user_id", lazy="dynamic")

@@ -4,6 +4,7 @@ from application.models.auth import ActiveSession
 from application.database import db
 from json import loads as json_loads
 from functools import wraps
+from flask_restful import Resource
 
 def ResponseObj(success=True, message="", code=200, data={}, exceptionObj = {}, custom_code=200):
     to_return = {"success": success, "message": message, "data": data, "code": custom_code}
@@ -17,7 +18,8 @@ def validate(token="", key=""):
     
     res = {"success":False, "message": "Initalise"}
     try:
-        activeSession = db.session.query(ActiveSession).filter(ActiveSession.ver_code == token, user_id=key).first()
+        print(token, key)
+        activeSession = db.session.query(ActiveSession).filter(ActiveSession.ver_code == token, ActiveSession.user_id==key).first()
         
         if activeSession != None:
             activeSession.last_access_datetime = datetime.now()
@@ -28,7 +30,6 @@ def validate(token="", key=""):
             res = {"success":False, "message": "Session expired, Login again to continue.", "custom_code":7}
             
     except Exception as e:
-        res = {"success":False, "message": e}
         raise Exception(e)
         
     return res
@@ -46,8 +47,10 @@ def token_required(method="POST"):
                     data = request.args
                 else:
                     data = json_loads(request.data)
-                result = validate(token=token, key=data.get('key', ""))
+                key = data.get('key', "")
+                result = validate(token=token, key=key)
                 if result['success'] == True:
+                    Kwargs.update({"key":key})
                     return fn(*args, **Kwargs)
                 else:
                     return ResponseObj(False,result['message'], 401, custom_code=100)
@@ -57,3 +60,28 @@ def token_required(method="POST"):
         return wrapper
 
     return wrapper_main
+
+class CustomException(Exception):
+    pass
+
+class BaseAPIClass(Resource):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.success = True
+        self.message = "Success"
+        self.code = 200
+        self.data = {}
+        self.exceptionObj = {}
+        self.custom_code = 000
+        self.print_log = True
+
+    def _exception_occured(self, e, custom=False):
+        self.success = False
+        self.message = "Internal Server Error" if not custom else str(e)
+        self.code = 400 if not custom else 500
+        self.exceptionObj = e
+        self.data = {}
+    
+    def _get_response(self):
+        return ResponseObj(self.success, self.message, self.code, self.data, self.exceptionObj, self.custom_code)
+    
