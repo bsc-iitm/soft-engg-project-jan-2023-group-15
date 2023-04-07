@@ -58,6 +58,9 @@ api.add_resource(Logout, '/api/logout', methods=['POST'])
 from application.api.user import UserManagement
 api.add_resource(UserManagement, '/api/user', methods=['POST', 'GET'])
 
+from application.api.tickets import TicketsAPI
+api.add_resource(TicketsAPI, '/api/ticket', methods=['POST', 'GET', 'PUT', 'DELETE'])
+
 if __name__ == "__main__":
     db.create_all()
     app.run()

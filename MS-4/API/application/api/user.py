@@ -5,8 +5,8 @@ class UserManagement(Resource):
     
     @token_required("GET")
     def get(self):
-        return ResponseObj(success=False, message="Success", code=200, data={}, exceptionObj={}, custom_code=102)
+        return ResponseObj(success=True, message="Success", code=200, data={}, exceptionObj={}, custom_code=102)
     
     @token_required()
     def post(self):
-        return ResponseObj(success=False, message="Success", code=200, data={}, exceptionObj={}, custom_code=103)
+        return ResponseObj(success=True, message="Success", code=200, data={}, exceptionObj={}, custom_code=103)
