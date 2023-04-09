@@ -12,8 +12,8 @@ login_req = reqparse.RequestParser()
 login_req.add_argument("obj_data", required=True, type=dict, help='OAuth is required')
 
 register_req = reqparse.RequestParser()
-register_req.add_argument("username", required=True, type=str, help='Username is required')
-register_req.add_argument("email", required=True, type=str, help='Email is required')
+register_req.add_argument("username", required=True, type=str, trim=True, help='Username is required')
+register_req.add_argument("email", required=True, type=str, trim=True, help='Email is required')
 
 JWT_SECRET_KEY = "wvz^f.wu^ZDtm@X.N{s@9NGXbP[}bWdM"
 HASHING_CODE = "Q^v>em/F#jF6HD1nh`2~@O7[TWcVyKA"
@@ -47,6 +47,9 @@ class Login(BaseAPIClass):
 
             user = db.session.query(User).filter(User.email == email).first()
 
+            if user.status==User.ACCOUNT_STATUS.BLOCKED:
+                raise CustomException("Your account is blocked")
+            
             if user == None:
                 username = str(email).split("@")[0]
                 profile_picture = obj_data["user"]["photoURL"]
@@ -63,6 +66,9 @@ class Login(BaseAPIClass):
             else:
                 if user.password != password:
                     raise CustomException("Authentication failed")
+                
+                if user.status==User.ACCOUNT_STATUS.DEACTIVATED:
+                    user.status=User.ACCOUNT_STATUS.ACTIVE
                 
             activeSession = self._create_active_session(user)
             self.message = "Login successful!"
@@ -92,6 +98,9 @@ class SupportStaffLogin(Login):
             email = obj_data["user"]["email"]
             user = db.session.query(User).filter(User.email == email, User.role==User.Role.SUPPORT_STAFF).first()
 
+            if user.status==User.ACCOUNT_STATUS.BLOCKED:
+                raise CustomException("Your account is blocked")
+            
             if user == None:
                 raise CustomException("You are not registered as support staff, please ask admin to give you access")
             else:
@@ -104,6 +113,8 @@ class SupportStaffLogin(Login):
                     db.session.commit()
                 if user.password != password:
                     raise CustomException("Authentication failed")
+                if user.status==User.ACCOUNT_STATUS.DEACTIVATED:
+                    user.status=User.ACCOUNT_STATUS.ACTIVE
             
             activeSession = self._create_active_session(user)
             self.message = "Login successful!"

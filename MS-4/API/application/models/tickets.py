@@ -25,7 +25,6 @@ class Tickets(Base):
     created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     is_open = db.Column(db.Boolean(), default=True)
     is_offensive = db.Column(db.Boolean(), default=False)
-    is_faq = db.Column(db.Boolean(), default=False)
     status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     priority = db.Column(db.Enum(PRIORITY), server_default="LOW")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -151,7 +150,7 @@ class SupportStaffTickets(Base):
     class STATUS(Enum):
         ACTIVE = 1
         DELETED = 2
-        
+
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     ticket_id = db.Column(db.Text, db.ForeignKey(Tickets.id, ondelete='CASCADE'), nullable=False)
@@ -171,6 +170,22 @@ class SupportStaffTags(Base):
     user_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
     tag_id = db.Column(db.Text, db.ForeignKey(Tags.id, ondelete='CASCADE'), nullable=False)
     created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())    
+
+class FAQ(Base):
+    __tablename__ = "faqs"
+    class STATUS(Enum):
+        REQUESTED = 1
+        ACTIVE = 2
+        DELETED = 3
+
+    id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    approved_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    title = db.Column(db.String(5000), nullable=False)
+    answer = db.Column(db.String(5000), nullable=False)
     status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())    

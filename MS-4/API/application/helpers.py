@@ -1,6 +1,7 @@
 from flask import request
 from datetime import datetime
 from application.models.auth import ActiveSession
+from application.models.user import User
 from application.database import db
 from json import loads as json_loads
 from functools import wraps
@@ -78,10 +79,23 @@ class BaseAPIClass(Resource):
     def _exception_occured(self, e, custom=False):
         self.success = False
         self.message = "Internal Server Error" if not custom else str(e)
-        self.code = 400 if not custom else 500
+        self.code = 400 if custom else 500
+        if isinstance(e, CustomException):
+            if isinstance(e.args[0], tuple) and len(e.args[0]) > 1:
+                self.message = e.args[0][0]
+                self.code = e.args[0][1]
+
         self.exceptionObj = e
         self.data = {}
     
     def _get_response(self):
         return ResponseObj(self.success, self.message, self.code, self.data, self.exceptionObj, self.custom_code)
-    
+
+def get_user(key, admin=False, isActive=True):
+    if isActive:
+        user = db.session.query(User).filter(User.id == key, User.status == User.ACCOUNT_STATUS.ACTIVE).first()
+    else:
+        user = db.session.query(User).filter(User.id == key).first()
+    if user == None or (admin and user.role != User.Role.ADMIN):
+        raise CustomException(("User does not exist", 404))
+    return user

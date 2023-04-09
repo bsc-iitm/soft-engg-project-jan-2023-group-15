@@ -55,11 +55,19 @@ api.add_resource(SupportStaffLogin, '/api/support_login', methods=['POST'])
 api.add_resource(SupportStaffRegister, '/api/support_register', methods=['POST'])
 api.add_resource(Logout, '/api/logout', methods=['POST'])
 
-from application.api.user import UserManagement
+from application.api.user import UserManagement, BlockedUser, DeactivateUser, UnblockedUser, GetSupportStaff
 api.add_resource(UserManagement, '/api/user', methods=['POST', 'GET'])
+api.add_resource(BlockedUser, '/api/user/block', methods=['POST'])
+api.add_resource(DeactivateUser, '/api/user/deactivate', methods=['POST'])
+api.add_resource(UnblockedUser, '/api/user/unblock', methods=['POST'])
+api.add_resource(GetSupportStaff, '/api/staff', methods=['GET'])
 
 from application.api.tickets import TicketsAPI
 api.add_resource(TicketsAPI, '/api/ticket', methods=['POST', 'GET', 'PUT', 'DELETE'])
+
+from application.api.tags import TagManagement, SupportStaffTagManagement
+api.add_resource(TagManagement, '/api/tag', methods=['POST', 'GET', 'PUT', 'DELETE'])
+api.add_resource(SupportStaffTagManagement, '/api/tag/staff', methods=['POST', 'DELETE'])
 
 if __name__ == "__main__":
     db.create_all()
