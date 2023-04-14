@@ -46,9 +46,6 @@ class Login(BaseAPIClass):
             password = sha256(obj_data["user"]["uid"].encode("utf-8")).hexdigest()
 
             user = db.session.query(User).filter(User.email == email).first()
-
-            if user.status==User.ACCOUNT_STATUS.BLOCKED:
-                raise CustomException("Your account is blocked")
             
             if user == None:
                 username = str(email).split("@")[0]
@@ -64,6 +61,9 @@ class Login(BaseAPIClass):
                 db.session.add(user)
                 db.session.commit()
             else:
+                if user.status==User.ACCOUNT_STATUS.BLOCKED:
+                    raise CustomException("Your account is blocked")
+
                 if user.password != password:
                     raise CustomException("Authentication failed")
                 

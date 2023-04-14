@@ -27,8 +27,6 @@ def _get_tag(tag_id):
 
 class TagManagement(BaseAPIClass):
 
-    
-    
     @token_required("GET")
     def get(self, key):
         try:
