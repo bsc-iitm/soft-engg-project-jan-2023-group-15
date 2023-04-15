@@ -47,7 +47,6 @@ class Login(BaseAPIClass):
             password = sha256(obj_data["user"]["uid"].encode("utf-8")).hexdigest()
 
             user = db.session.query(User).filter(User.email == email).first()
-
             
             if user == None:
                 username = str(email).split("@")[0]

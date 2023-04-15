@@ -43,7 +43,7 @@ ticket_output_with_response_fields = {
     "priority" : fields.String(attribute=lambda obj1: str(Tickets.PRIORITY(obj1.priority).name)),
     "created_at" : fields.DateTime,
     "last_updated_at" : fields.DateTime,
-    "tags":fields.List(fields.Nested(ticket_tags), attribute=lambda obj: obj.tags.order_by(TicketTags.last_updated_at.desc()).all()),
+    "tags":fields.List(fields.Nested(ticket_tags), attribute=lambda obj: obj.tags.order_by(TicketTags.created_at.desc()).all()),
 }
 
 staff_tags = {
