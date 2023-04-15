@@ -6,6 +6,7 @@ from application.database import db
 from json import loads as json_loads
 from functools import wraps
 from flask_restful import Resource
+from flask import render_template
 
 def ResponseObj(success=True, message="", code=200, data={}, exceptionObj = {}, custom_code=200):
     to_return = {"success": success, "message": message, "data": data, "code": custom_code}
@@ -99,3 +100,6 @@ def get_user(key, admin=False, isActive=True):
     if user == None or (admin and user.role != User.Role.ADMIN):
         raise CustomException(("User does not exist", 404))
     return user
+
+def format_message(template_file, data={}):
+    return render_template(template_file, data=data)

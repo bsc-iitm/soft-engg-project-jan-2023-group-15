@@ -1,6 +1,6 @@
 from flask_restful import fields
 from application.models.user import User
-from application.models.tickets import Tickets, Tags, SupportStaffTags, TicketTags
+from application.models.tickets import Tickets, Tags, SupportStaffTags, TicketTags, FAQ
 from application.database import db
 
 user_output_with_response_fields = {
@@ -60,4 +60,13 @@ staff_tags = {
 staff_output_with_response_fields= {
     **user_output_with_response_fields,
     "tags":fields.List(fields.Nested(staff_tags), attribute=lambda obj: obj.tags.filter(SupportStaffTags.status == SupportStaffTags.STATUS.ACTIVE).order_by(SupportStaffTags.last_updated_at.desc()).all()),
+}
+
+faq_output_with_response_fields = {
+    "id" : fields.String,
+    "title" : fields.String,
+    "answer" : fields.String,
+    "status" : fields.String(attribute=lambda obj1: str(FAQ.STATUS(obj1.status).name)),
+    "created_at" : fields.DateTime,
+    "last_updated_at" : fields.DateTime,
 }

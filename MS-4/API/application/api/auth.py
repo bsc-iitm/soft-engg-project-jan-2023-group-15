@@ -7,6 +7,7 @@ from jwt import encode
 from datetime import datetime
 from hashlib import sha256
 from application.helpers import token_required
+from application.tasks import send_email
 
 login_req = reqparse.RequestParser()
 login_req.add_argument("obj_data", required=True, type=dict, help='OAuth is required')
@@ -47,8 +48,6 @@ class Login(BaseAPIClass):
 
             user = db.session.query(User).filter(User.email == email).first()
 
-            if user.status==User.ACCOUNT_STATUS.BLOCKED:
-                raise CustomException("Your account is blocked")
             
             if user == None:
                 username = str(email).split("@")[0]
@@ -63,7 +62,18 @@ class Login(BaseAPIClass):
                 )
                 db.session.add(user)
                 db.session.commit()
+                send_email.apply_async(args=[
+                    user.email,
+                    "Welcome to portal!",
+                    "welcome.html",
+                    {
+                        "name":full_name
+                    }
+                ])
             else:
+                if user.status==User.ACCOUNT_STATUS.BLOCKED:
+                    raise CustomException("Your account is blocked")
+                
                 if user.password != password:
                     raise CustomException("Authentication failed")
                 

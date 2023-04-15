@@ -183,9 +183,10 @@ class FAQ(Base):
 
     id = db.Column(db.Text, primary_key=True, default=lambda: str(uuid.uuid4()))
     created_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
-    approved_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=False)
+    approved_by_id = db.Column(db.Text, db.ForeignKey(User.id, ondelete='CASCADE'), nullable=True)
     title = db.Column(db.String(5000), nullable=False)
     answer = db.Column(db.String(5000), nullable=False)
+    ticket_id = db.Column(db.Text, db.ForeignKey(Tickets.id, ondelete='CASCADE'), nullable=True)
     status = db.Column(db.Enum(STATUS), server_default="ACTIVE")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_updated_at = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.current_timestamp())    

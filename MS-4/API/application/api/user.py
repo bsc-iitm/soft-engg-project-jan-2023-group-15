@@ -94,6 +94,8 @@ class DeactivateUser(BlockedUser):
     def post(self, key):
         try:
             user = get_user(key)
+            if user.role == User.Role.ADMIN:
+                raise CustomException("You can't deactivate your account as you are an admin")
             user.status = User.ACCOUNT_STATUS.DEACTIVATED
             db.session.add(user)
             db.session.commit()
