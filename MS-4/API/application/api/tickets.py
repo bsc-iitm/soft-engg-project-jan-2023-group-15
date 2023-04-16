@@ -39,6 +39,10 @@ edit_status_req_args.add_argument("is_offensive", required=False, type=int, trim
 edit_status_req_args.add_argument("is_answer", required=False, type=int, trim=True, store_missing=-1)
 edit_status_req_args.add_argument("reply_id", required=False, type=str, trim=True, store_missing="")
 
+assign_ticket_req_args = reqparse.RequestParser()
+assign_ticket_req_args.add_argument("ticket_id", required=True, type=str, trim=True, store_missing="")
+assign_ticket_req_args.add_argument("user_id", required=True, type=str, trim=True, store_missing="")
+
 class TicketsAPI(BaseAPIClass):
     def _get_required(self, data, required_fields):
         for argument in required_fields:
@@ -686,3 +690,93 @@ class EditStatusTicket(BaseAPIClass):
 
         return self._get_response()
 
+class AssignTicket(BaseAPIClass):
+
+    @token_required()
+    def post(self, key):
+        try:
+            args = assign_ticket_req_args.parse_args()
+            ticket_id = args.get('ticket_id', '')
+            user_id = args.get('user_id', '')
+
+            if len(ticket_id) == 0 and len(user_id) == 0:
+                raise CustomException(("Invalid request", 400))
+            
+            admin = get_user(key, admin=True)
+            user = get_user(user_id)
+
+            ticket = db.session.query(Tickets).filter_by(id=ticket_id, status=Tickets.STATUS.ACTIVE).first()
+            
+            if not ticket:
+                raise CustomException(("Ticket not found", 404))
+
+            already_assigned = db.session.query(SupportStaffTickets).filter_by(
+                user_id = user.id, 
+                ticket_id=ticket.id, 
+                status=SupportStaffTickets.STATUS.ACTIVE
+            ).first()
+
+            if already_assigned:
+                raise CustomException(("User already assigned to this ticket", 400))
+            
+            new_assign = SupportStaffTickets(
+                user_id = user.id,
+                ticket_id = ticket.id,
+                created_by_id = admin.id
+            )
+
+            db.session.add(new_assign)
+            db.session.commit()
+
+            self.data = {}
+
+        except CustomException as e:
+            self.custom_code = 4019
+            self._exception_occured(e, True)
+        except Exception as e:
+            self.custom_code = 4020
+            self._exception_occured(e, False)
+
+        return self._get_response()
+
+    @token_required()
+    def delete(self, key):
+        try:
+            args = assign_ticket_req_args.parse_args()
+            ticket_id = args.get('ticket_id', '')
+            user_id = args.get('user_id', '')
+
+            if len(ticket_id) == 0 and len(user_id) == 0:
+                raise CustomException(("Invalid request", 400))
+            
+            admin = get_user(key, admin=True)
+            user = get_user(user_id)
+
+            ticket = db.session.query(Tickets).filter_by(id=ticket_id, status=Tickets.STATUS.ACTIVE).first()
+            
+            if not ticket:
+                raise CustomException(("Ticket not found", 404))
+
+            already_assigned = db.session.query(SupportStaffTickets).filter_by(
+                user_id = user.id, 
+                ticket_id=ticket.id, 
+                status=SupportStaffTickets.STATUS.ACTIVE
+            ).first()
+
+            if not already_assigned:
+                raise CustomException(("User is not assigned to this ticket", 400))
+            
+            already_assigned.status = SupportStaffTickets.STATUS.DELETED
+            db.session.add(already_assigned)
+            db.session.commit()
+
+            self.data = {}
+
+        except CustomException as e:
+            self.custom_code = 4021
+            self._exception_occured(e, True)
+        except Exception as e:
+            self.custom_code = 4022
+            self._exception_occured(e, False)
+
+        return self._get_response()

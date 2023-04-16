@@ -79,13 +79,14 @@ api.add_resource(DeactivateUser, '/api/user/deactivate', methods=['POST'])
 api.add_resource(UnblockedUser, '/api/user/unblock', methods=['POST'])
 api.add_resource(GetSupportStaff, '/api/staff', methods=['GET'])
 
-from application.api.tickets import TicketsAPI, TicketsAll, TicketsFilesDelete, TicketsStaffAll, TicketsUpDownVote, EditStatusTicket
+from application.api.tickets import TicketsAPI, TicketsAll, TicketsFilesDelete, TicketsStaffAll, TicketsUpDownVote, EditStatusTicket, AssignTicket
 api.add_resource(TicketsAPI, '/api/ticket', methods=['POST', 'GET', 'PUT', 'DELETE'])
 api.add_resource(TicketsAll, '/api/ticket/all', methods=['GET'])
 api.add_resource(TicketsStaffAll, '/api/ticket/staff', methods=['GET'])
 api.add_resource(TicketsFilesDelete, '/api/ticket/files/delete', methods=['POST'])
 api.add_resource(TicketsUpDownVote, '/api/ticket/vote', methods=['POST'])
 api.add_resource(EditStatusTicket, '/api/ticket/status', methods=['POST'])
+api.add_resource(AssignTicket, '/api/ticket/assign', methods=['POST', 'DELETE'])
 
 from application.api.tags import TagManagement, SupportStaffTagManagement
 api.add_resource(TagManagement, '/api/tag', methods=['POST', 'GET', 'PUT', 'DELETE'])
