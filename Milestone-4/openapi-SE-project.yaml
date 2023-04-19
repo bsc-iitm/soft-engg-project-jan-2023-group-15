@@ -1,0 +1,983 @@
+openapi: 3.0.3
+info:
+  title: Ticket Issue - OpenAPI 3.0
+  description: 
+    This is a support system to raise tickets for issues. <br><br>
+    Note - Token after login is provided, and it can be used in autorize;
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  version: 1.0.11
+servers:
+  - url: http://127.0.0.1:5000
+tags:
+  - name: Ticket
+    description: Everything about tickets
+  - name: LoginMangagement
+    description: Everything related to Users Login/Logout
+  - name: Tag
+    description: Everything about Tags
+  - name: FAQ
+    description: Everything about FAQs
+  
+paths:
+  /api/login:
+    summary: Create a user/ Login User
+    post:
+      summary: Create a user/ Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                obj_data:
+                  type: object
+                  properties:
+                    user:
+                      type: object
+                      properties:
+                        displayName:
+                          type: string
+                          example: Test Name
+                        photoURL:
+                          type: string
+                          example: photo URL
+                        email:
+                          type: string
+                          example: test@example.com
+                        uid:
+                          type: string
+                          example: exampleuid
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+      tags:
+        - LoginMangagement
+
+  /api/support_login:
+    summary: Login Support Staff
+    post:
+      summary: Login Support Staff
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                obj_data:
+                  type: object
+                  properties:
+                    user:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: test@example.com
+                        uid:
+                          type: string
+                          example: "{{support_staff_id}}"
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+      tags:
+        - LoginMangagement
+
+  /api/support_register:
+    summary: Register Support Staff (admin only)
+    post:
+      summary: Register Support Staff (admin only)
+      security: 
+        [{Authorization:[]}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: test username
+                email:
+                  type: string
+                  example: test@example.com
+                key:
+                  type: string
+                  example: '{{key}}'
+                        
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+      tags:
+        - LoginMangagement
+
+  /api/logout:
+    post:
+      summary: Logout User
+      security: 
+        [{Authorization:[]}]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+      tags:
+        - LoginMangagement
+
+  /api/ticket:
+    summary: Everything related to tickets
+    get:
+      summary: Get a ticket from its ID
+      description: 'Get a ticket from its ID'
+      operationId: GetTickectByID
+      security: 
+        [{Authorization:[]}]
+      parameters:
+        - name: key
+          in: query
+          schema:
+            type: string
+            example: '{{key}}'
+        - in: query
+          name: ticket_id
+          schema:
+            type: string
+            example: '{{ticket_id}}'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+      tags:
+        - Ticket
+    post:
+      summary: Create a new Ticket
+      description: 'Create a new Ticket'
+      operationId: CreateTicket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                title:
+                  type: string
+                  example: Could not access courses on Portal.
+                description:
+                  type: string
+                  example: Dear Sir/Mam, I am not able to access portal since 24 april. please look into it.
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    example: "{{tag_id}}"
+        
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a Ticket
+      description: 'Update a Ticket'
+      operationId: UpdateTicket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+                title:
+                  type: string
+                  example: Could not access courses on Portal.
+                description:
+                  type: string
+                  example: Dear Sir/Mam, I am not able to access portal since 24 april. please look into it.
+                tags:
+                  type: array
+                  items:
+                    type: string
+                    example: "{{tag_id}}"
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a Ticket
+      description: 'Delete a Ticket'
+      operationId: DeleteTicket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/ticket/all:
+    post:
+      summary: Get all tickets with filters
+      description: 'Get all tickets with filters'
+      operationId: Getallticketswithfilters
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                filters:
+                  type: array
+                  items:
+                    type: string
+                    example: "{{tag_id}}"
+        
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/ticket/vote:
+    post:
+      summary: Upvote/Downvote a ticket
+      description: 'Upvote/Downvote a ticket'
+      operationId: UpvoteDownvoteticket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                vote:
+                  type: integer
+                  example: 0
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+                reply_id:
+                  type: string
+                  example: "{{reply_id}}"
+                
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/ticket/reply:
+    post:
+      summary: Reply to a ticket
+      description: 'Reply to a ticket'
+      operationId: Replytoticket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+                reply:
+                  type: string
+                  example: example reply
+                files:
+                  type: array
+                  items:
+                    type: string
+                    example: example file url
+                
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+    put:
+      summary: Edit Reply to a ticket
+      description: Edit'Reply to a ticket'
+      operationId: EditReplytoticket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                reply_id:
+                  type: string
+                  example: "{{reply_id}}"
+                reply:
+                  type: string
+                  example: example reply
+                files:
+                  type: array
+                  items:
+                    type: string
+                    example: example file url
+                
+      responses:
+        '201':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete Reply to a ticket
+      description: Delete'Reply to a ticket'
+      operationId: DeleteReplytoticket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                reply_id:
+                  type: string
+                  example: "{{reply_id}}"
+                
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+          
+  /api/ticket/assign:
+    post:
+      summary: Assign tickets to staff
+      description: 'Assign tickets to staff'
+      operationId: AssignticketstoStaff
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                user_id:
+                  type: string
+                  example: "{{support_staff_id}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a Ticket Assigned
+      description: 'Delete a Ticket Assigned'
+      operationId: DeleteassignedTicket
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Ticket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                user_id:
+                  type: string
+                  example: "{{support_staff_id}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+
+  /api/tag:
+    summary: Everything related to tags
+    get:
+      summary: Get a Tag
+      description: 'Get a Tag'
+      operationId: GetTag
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      parameters:
+        - name: key
+          in: query
+          schema:
+            type: string
+            example: '{{key}}'
+        - in: query
+          name: tag_id
+          schema:
+            type: string
+            example: '{{tag_id}}'
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Create a new Tag
+      description: 'Create a new Tag'
+      operationId: CreateTag
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                tag_title:
+                  type: string
+                  example: "Test Tag"
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a Tag
+      description: 'Update a Tag'
+      operationId: UpdateTag
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                tag_id:
+                  type: string
+                  example: "{{tag_id}}"
+                tag_title:
+                  type: string
+                  example: "Test Tag"
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a Tag
+      description: 'Delete a Tag'
+      operationId: DeleteTag
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{tag_id}}"
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/faq:
+    summary: Get all FAQs
+    get:
+      summary: Get all FAQs
+      description: 'Get all FAQs'
+      operationId: GetFAQs
+      tags:
+        - FAQ
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    post:
+      summary: Create a new FAQ
+      description: 'Create a new FAQ'
+      operationId: CreateFAQ
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - FAQ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                title:
+                  type: string
+                  example: "Test title"
+                answer:
+                  type: string
+                  example: "Test answer"
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+    put:
+      summary: Update a FAQ
+      description: 'Update a FAQ'
+      operationId: UpdateFAQ
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - FAQ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                title:
+                  type: string
+                  example: "Test title"
+                answer:
+                  type: string
+                  example: "Test answer"
+                faq_id:
+                  type: string
+                  example: "{{faq_id}}"
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a FAQ
+      description: 'Delete a FAQ'
+      operationId: DeleteFAQ
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - FAQ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{faq_id}}"
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+  /api/faq/request:
+    post:
+      summary: Create a new FAQ Request
+      description: 'Create a new FAQ Request'
+      operationId: CreateFAQRequest
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - FAQ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                ticket_id:
+                  type: string
+                  example: "{{ticket_id}}"
+        
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/faq/accept:
+    post:
+      summary: Accept FAQ Request
+      description: 'Accept FAQ Request'
+      operationId: AcceptFAQRequest
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - FAQ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                tag_id:
+                  type: string
+                  example: "{{tag_id}}"
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+  /api/tag/staff:
+    post:
+      summary: Assign tags to staff
+      description: 'Assign tags to staff'
+      operationId: AssigntagstoStaff
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                user_id:
+                  type: string
+                  example: "{{support_staff_id}}"
+                tag_id:
+                  type: string
+                  example: "{{tag_id}}"
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+    delete:
+      summary: Delete a Tag Assigned
+      description: 'Delete a Tag Assigned'
+      operationId: DeleteassignedTag
+      security: 
+        [{Authorization:[]}]
+      tags:
+        - Tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: "{{key}}"
+                user_id:
+                  type: string
+                  example: "{{support_staff_id}}"
+                tag_id:
+                  type: string
+                  example: "{{tag_id}}"
+      responses:
+        '201':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          description: Internal Server Error
+
+
+
+components:
+  securitySchemes:
+    Authorization:
+      type: apiKey
+      description: API key to authorize requests.
+      name: Authorization
+      in: header
+  responses:
+    400:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: Invalid request parameters
+              data:
+                type: object
+                example: {}
+              code:
+                type: integer
+                example: 400
+
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 0d2e006e-2b11-42ad-ac6c-b546f959de1d
+        username:
+          type: string
+          example: test
+        email:
+          type: string
+          example: test@gmail.com
+        full_name:
+          type: string
+          example: Test Full Name
+        profile_picture:
+          type: string
+          example: 'https://example.com/abc.png'
+        role:
+          type: string
+          example: STUDENT
+        created_at:
+          type: string
+          example: Thu, 06 Apr 2023 18:07:10 -0000
+        last_updated_at:
+          type: string
+          example: Thu, 06 Apr 2023 18:07:10 -0000
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 0d2e006e-2b11-42ad-ac6c-b546f959de1d
+        title:
+          type: string
+          example: Could not access courses on Portal.
+        description:
+          type: string
+          example: Dear Sir/Mam, I am not able to access portal since 24 april. please look into it.
+        created_by_id:
+          type: string
+          example: 0d2e006e-2b11-42ad-ac6c-b546f959de1d
+        is_open:
+          type: boolean
+          example: true
+        is_offensive:
+          type: boolean
+          example: false
+        is_faq:
+          type: boolean
+          example: false
+        status:
+          type: string
+          example: ACTIVE    
+        priority:
+          type: string
+          example: LOW
+        created_at:
+          type: string
+          example: Thu, 06 Apr 2023 18:07:10 -0000
+        last_updated_at:
+          type: string
+          example: Thu, 06 Apr 2023 18:07:10 -0000
+          
+     

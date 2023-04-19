@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style type="text/css">
+        .response_div {
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 10px;
+        }
+        
+        .w-100 {
+            width: 100% !important;
+        }
+        .text-left {
+            text-align: left !important;
+        }
+
+    </style>
+</head>
+<body>
+    <p>Hey admin, Please look at these tickets</p>
+    {% for ticket in data.tickets %}
+    <article class="response_div">
+        <h1 class="w-100 text-left"> {{ ticket.title }}</h1>
+        <p class="w-100 text-left"> {{ ticket.description }}</p>
+        <a href="http://localhost:3000/ticket/{{ticket.id}}" target="_blank" rel="noopener noreferrer">
+            Answer now
+        </a>
+    </article>
+    {% endfor %}
+</body>
+</html>
