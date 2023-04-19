@@ -60,7 +60,7 @@ def daily_notification():
     return "Done" + str(len(final_unresponsed_tickets))
 
 @celery.task()
-def notify_user(ticket_id):
+def notify_user(ticket_id, key):
     ticket = db.session.query(Tickets).filter(
         Tickets.id == ticket_id,
         Tickets.status==Tickets.STATUS.ACTIVE
@@ -70,9 +70,11 @@ def notify_user(ticket_id):
     if ticket:
         reply = ticket.replies.filter(TicketReplies.status == TicketReplies.STATUS.ACTIVE).order_by(TicketReplies.created_at.desc()).first()
         votes = ticket.votes.filter(TicketVotes.vote == TicketVotes.VOTE_TYPE.UP).all()
-        users = db.session.query(User).filter(User.id.in_([vote.user_id for vote in votes])).all()
+        user_ids = [vote.user_id for vote in votes if vote.user_id != key]
+        user_ids.append(ticket.created_by_id)
+        users = db.session.query(User).filter(User.id.in_(user_ids)).all()
         send_email.apply_async(args=[
-            [user.email for user in users],
+            list(set([user.email for user in users])),
             "Update on ticket",
             "ticket_responded.html",
             {

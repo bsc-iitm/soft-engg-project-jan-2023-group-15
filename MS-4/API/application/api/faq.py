@@ -17,6 +17,9 @@ edit_faq_req.add_argument("faq_id", required=True, type=str, trim=True)
 delete_faq_req = reqparse.RequestParser()
 delete_faq_req.add_argument("faq_id", required=True, type=str, trim=True)
 
+request_for_faq_args = reqparse.RequestParser()
+request_for_faq_args.add_argument("ticket_id", required=True, type=str, trim=True)
+
 req_faq_req = reqparse.RequestParser()
 req_faq_req.add_argument("faq_id", required=True, type=str, trim=True)
 req_faq_req.add_argument("rejected", required=False, type=int)
@@ -145,7 +148,7 @@ class FAQRequest(BaseAPIClass):
     @token_required()
     def post(self, key):
         try:
-            args = edit_faq_req.parse_args()
+            args = request_for_faq_args.parse_args()
             ticket_id = args.get('ticket_id', "")
 
             user = get_user(key, admin=False)
@@ -162,6 +165,13 @@ class FAQRequest(BaseAPIClass):
 
             if answer is None:
                 raise CustomException("Ticket is not resolved")
+            
+            already_faq = db.session.query(FAQ).filter(
+                FAQ.ticket_id == ticket_id,
+            ).first()
+
+            if already_faq:
+                raise CustomException("FAQ already requested")
             
             faq = FAQ(
                 title=ticket.title,
@@ -189,7 +199,7 @@ class FAQAccept(BaseAPIClass):
     def get(self, key):
         try:
             admin = get_user(key, admin=True)
-            data = db.session.query(FAQ).filter(FAQ.status == FAQ.STATUS.REQUESTED).all()
+            data = db.session.query(FAQ).filter((FAQ.status == FAQ.STATUS.REQUESTED) | (FAQ.status == FAQ.STATUS.DELETED)).all()
             self.data = marshal(data, faq_output_with_response_fields)
         except CustomException as e:
             self.custom_code = 5011
@@ -208,7 +218,7 @@ class FAQAccept(BaseAPIClass):
 
             admin = get_user(key, admin=True)
 
-            faq = db.session.query(FAQ).filter(FAQ.id==faq_id, FAQ.status==FAQ.STATUS.REQUESTED).first()
+            faq = db.session.query(FAQ).filter(FAQ.id==faq_id, (FAQ.status==FAQ.STATUS.REQUESTED) | (FAQ.status==FAQ.STATUS.DELETED)).first()
             if faq is None:
                 raise CustomException(("FAQ does not exist", 404))
             
@@ -233,6 +243,8 @@ class FAQAccept(BaseAPIClass):
         return self._get_response()
 
 class PinTicket(BaseAPIClass):
+
+    @token_required()
     def post(self, key):
         try:
             args = pin_req_args.parse_args()

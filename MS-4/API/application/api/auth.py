@@ -1,4 +1,4 @@
-from flask_restful import reqparse, request
+from flask_restful import reqparse, request, marshal
 from application.models.user import User
 from application.models.auth import ActiveSession
 from application.database import db
@@ -8,6 +8,7 @@ from datetime import datetime
 from hashlib import sha256
 from application.helpers import token_required
 from application.tasks import send_email
+from application.response_fields import user_output_with_response_fields, staff_output_with_response_fields
 
 login_req = reqparse.RequestParser()
 login_req.add_argument("obj_data", required=True, type=dict, help='OAuth is required')
@@ -70,6 +71,9 @@ class Login(BaseAPIClass):
                     }
                 ])
             else:
+                if user.role != User.Role.STUDENT:
+                    raise CustomException("You are not registered as student")
+
                 if user.status==User.ACCOUNT_STATUS.BLOCKED:
                     raise CustomException("Your account is blocked")
                 
@@ -83,7 +87,8 @@ class Login(BaseAPIClass):
             self.message = "Login successful!"
             self.data = {
                 "key":user.id,
-                "token":activeSession.ver_code
+                "token":activeSession.ver_code,
+                "user": marshal(user, user_output_with_response_fields)
             }
         except CustomException as e:
             self.custom_code = 1001
@@ -105,7 +110,7 @@ class SupportStaffLogin(Login):
                 raise CustomException("OAuth is invalid")
             
             email = obj_data["user"]["email"]
-            user = db.session.query(User).filter(User.email == email, User.role==User.Role.SUPPORT_STAFF).first()
+            user = db.session.query(User).filter(User.email == email, (User.role==User.Role.SUPPORT_STAFF) | (User.role==User.Role.ADMIN)).first()
 
             if user.status==User.ACCOUNT_STATUS.BLOCKED:
                 raise CustomException("Your account is blocked")
@@ -127,9 +132,16 @@ class SupportStaffLogin(Login):
             
             activeSession = self._create_active_session(user)
             self.message = "Login successful!"
+            
+            if user.role == User.Role.SUPPORT_STAFF:
+                user_data = marshal(user, staff_output_with_response_fields)
+            else:
+                user_data = marshal(user, user_output_with_response_fields)
+
             self.data = {
                 "key":user.id,
-                "token":activeSession.ver_code
+                "token":activeSession.ver_code,
+                "user": user_data
             }
         except CustomException as e:
             self.custom_code = 1003
@@ -170,7 +182,7 @@ class SupportStaffRegister(BaseAPIClass):
                 db.session.commit()
                     
             self.message = "Support staff added successfully!"
-            self.data = {}
+            self.data = marshal(user, staff_output_with_response_fields)
         except CustomException as e:
             self.custom_code = 1005
             self._exception_occured(e, True)

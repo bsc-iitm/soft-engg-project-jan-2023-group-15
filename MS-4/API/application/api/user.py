@@ -12,6 +12,9 @@ edit_profile_req.add_argument("full_name", required=False, type=str, trim=True, 
 blocked_profile_req = reqparse.RequestParser()
 blocked_profile_req.add_argument("user_id", required=False, type=str, trim=True, help='User is required')
 
+remove_staff_req = reqparse.RequestParser()
+remove_staff_req.add_argument("staff_id", required=True, type=str, trim=True, help='Username is required')
+
 class UserManagement(BaseAPIClass):
     
     @token_required("GET")
@@ -110,6 +113,24 @@ class DeactivateUser(BlockedUser):
         return self._get_response()
 
 class UnblockedUser(BaseAPIClass):
+
+    @token_required("GET")
+    def get(self, key):
+        try:
+            user = get_user(key)
+            if user.role == User.Role.STUDENT:
+                raise CustomException("Permission denied")
+            users = User.query.filter_by(status=User.ACCOUNT_STATUS.BLOCKED).all()
+            self.data = marshal(users, user_output_with_response_fields)
+        except CustomException as e:
+            self.custom_code = 2007
+            self._exception_occured(e, True)
+        except Exception as e:
+            self.custom_code = 2008
+            self._exception_occured(e, False)
+
+        return self._get_response()
+
     @token_required()
     def post(self, key):
         try:
@@ -139,7 +160,7 @@ class GetSupportStaff(BaseAPIClass):
     def get(self, key):
         try:
             user = get_user(key, admin=True)
-            staff = db.session.query(User).filter(User.role == User.Role.SUPPORT_STAFF).all()
+            staff = db.session.query(User).filter(User.role == User.Role.SUPPORT_STAFF, User.status == User.ACCOUNT_STATUS.ACTIVE).all()
             self.data = marshal(staff, staff_output_with_response_fields)
         except CustomException as e:
             self.custom_code = 2009
@@ -150,3 +171,32 @@ class GetSupportStaff(BaseAPIClass):
 
         return self._get_response()
     
+    @token_required()
+    def delete(self, key):
+        try:
+            args = remove_staff_req.parse_args()
+            staff_id = args.get('staff_id', "")
+            
+            if len(staff_id) == 0:
+                raise CustomException("Staff is invalid")
+            
+            admin = get_user(key, admin=True)
+
+            user = get_user(staff_id)
+
+            if user.role != User.Role.SUPPORT_STAFF:
+                raise CustomException("User not found")
+            
+            user.role = User.Role.STUDENT
+            db.session.add(user)
+            db.session.commit()
+                    
+            self.message = "Support staff removed successfully!"
+            self.data = marshal(user, staff_output_with_response_fields)
+        except CustomException as e:
+            self.custom_code = 2011
+            self._exception_occured(e, True)
+        except Exception as e:
+            self.custom_code = 2012
+            self._exception_occured(e, False)
+        return self._get_response()

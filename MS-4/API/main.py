@@ -76,17 +76,18 @@ from application.api.user import UserManagement, BlockedUser, DeactivateUser, Un
 api.add_resource(UserManagement, '/api/user', methods=['POST', 'GET'])
 api.add_resource(BlockedUser, '/api/user/block', methods=['POST'])
 api.add_resource(DeactivateUser, '/api/user/deactivate', methods=['POST'])
-api.add_resource(UnblockedUser, '/api/user/unblock', methods=['POST'])
-api.add_resource(GetSupportStaff, '/api/staff', methods=['GET'])
+api.add_resource(UnblockedUser, '/api/user/unblock', methods=['GET', 'POST'])
+api.add_resource(GetSupportStaff, '/api/staff', methods=['GET', 'DELETE'])
 
-from application.api.tickets import TicketsAPI, TicketsAll, TicketsFilesDelete, TicketsStaffAll, TicketsUpDownVote, EditStatusTicket, AssignTicket
+from application.api.tickets import TicketsAPI, TicketsAll, TicketsFilesDelete, TicketsStaffAll, TicketsUpDownVote, EditStatusTicket, AssignTicket, ReplyToTicket
 api.add_resource(TicketsAPI, '/api/ticket', methods=['POST', 'GET', 'PUT', 'DELETE'])
-api.add_resource(TicketsAll, '/api/ticket/all', methods=['GET'])
+api.add_resource(TicketsAll, '/api/ticket/all', methods=['POST'])
 api.add_resource(TicketsStaffAll, '/api/ticket/staff', methods=['GET'])
 api.add_resource(TicketsFilesDelete, '/api/ticket/files/delete', methods=['POST'])
 api.add_resource(TicketsUpDownVote, '/api/ticket/vote', methods=['POST'])
 api.add_resource(EditStatusTicket, '/api/ticket/status', methods=['POST'])
 api.add_resource(AssignTicket, '/api/ticket/assign', methods=['POST', 'DELETE'])
+api.add_resource(ReplyToTicket, '/api/ticket/reply', methods=['POST', 'PUT', 'DELETE'])
 
 from application.api.tags import TagManagement, SupportStaffTagManagement
 api.add_resource(TagManagement, '/api/tag', methods=['POST', 'GET', 'PUT', 'DELETE'])
@@ -94,7 +95,7 @@ api.add_resource(SupportStaffTagManagement, '/api/tag/staff', methods=['POST', '
 
 from application.api.faq import *
 api.add_resource(FAQManagement, '/api/faq', methods=['POST', 'GET', 'PUT', 'DELETE'])
-api.add_resource(FAQRequest, '/api/faq/request', methods=['POST', 'GET'])
+api.add_resource(FAQRequest, '/api/faq/request', methods=['POST'])
 api.add_resource(FAQAccept, '/api/faq/accept', methods=['POST', 'GET'])
 api.add_resource(PinTicket, '/api/ticket/pin', methods=['POST'])
 
